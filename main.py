@@ -272,7 +272,7 @@ class CambridgeDictionaryDialog(QDialog):
         dict_format = self.language_config[source_lang]["dict_format"]
         return f"{dict_format.format(target=target_lang)}/{word.lower().replace(' ', '-')}"
     
-    
+
     def handle_missing_word(self, word):
         """Handle cases where a word is not found in the Cambridge Dictionary"""
         msg = QMessageBox()
@@ -340,3 +340,73 @@ class CambridgeDictionaryDialog(QDialog):
                 }
             
         return "cancel"
+    
+    def create_card(self):
+        if not self.validate_api_keys():
+            return
+
+        word = self.word_input.text().strip()
+        if not word:
+            showInfo("Please enter a word")
+            return
+
+        try:
+            # Get the deck name and ensure it exists
+            deck_name = self.deck_combo.currentText()
+            deck_id = mw.col.decks.id(
+                deck_name, create=True
+            )  # This creates the deck if it doesn't exist
+            mw.col.decks.select(deck_id)
+
+            word_data = get_word_data(word, self.get_dict_url(word))
+
+            if word_data is None:
+                response = self.handle_missing_word(word)
+                if response == "cancel":
+                    return
+                word_data = response
+
+            mnemonic = synonym = antonym = ""
+
+            if word_data.get("entries"):
+                mnemonic_data = self.mnemonic_generator.create_mnemonic(
+                    word,
+                    word_data["entries"][0]["definition"],
+                    native_language=self.source_combo.currentText(),  # Native = source language
+                    target_language=self.target_combo.currentText()   # Target = learning language
+                )
+                    
+                mnemonic = mnemonic_data["mnemonic"]
+                synonym = mnemonic_data["synonym"]
+                antonym = mnemonic_data["antonym"]
+
+            note = create_anki_note(
+                word_data,
+                deck_name,
+                mnemonic,
+                synonym,
+                antonym,
+                mw.pm.night_mode(),
+            )
+
+            note_obj = mw.col.new_note(mw.col.models.by_name("Basic"))
+            note_obj["Front"] = note["fields"]["Front"]
+            note_obj["Back"] = note["fields"]["Back"]
+            mw.col.add_note(note_obj, deck_id)
+
+            self.word_input.clear()
+            showInfo(f"Card for '{word}' created successfully!")
+            mw.reset()
+
+        except Exception as e:
+            showInfo(f"Error creating card: {str(e)}")
+
+
+def show_dialog():
+    dialog = CambridgeDictionaryDialog(mw)
+    dialog.exec()
+
+
+action = QAction("MnemoMaker", mw)
+qconnect(action.triggered, show_dialog)
+mw.form.menuTools.addAction(action)
