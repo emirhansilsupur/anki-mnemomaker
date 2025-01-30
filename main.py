@@ -271,3 +271,72 @@ class CambridgeDictionaryDialog(QDialog):
             
         dict_format = self.language_config[source_lang]["dict_format"]
         return f"{dict_format.format(target=target_lang)}/{word.lower().replace(' ', '-')}"
+    
+    
+    def handle_missing_word(self, word):
+        """Handle cases where a word is not found in the Cambridge Dictionary"""
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Icon.Question)  # Updated icon
+        msg.setText(f"The word '{word}' was not found in the Cambridge Dictionary.")
+        msg.setInformativeText("Would you like to enter the definition manually?")
+        
+        # Updated button syntax
+        msg.setStandardButtons(
+            QMessageBox.StandardButton.Yes |
+            QMessageBox.StandardButton.No
+        )
+        
+        if msg.exec() == QMessageBox.StandardButton.Yes:
+
+            native_lang = self.source_combo.currentText()  # User's native language
+            target_lang = self.target_combo.currentText()  # User's learning language
+
+            # Create dialog for manual entry
+            dialog = QDialog(self)
+            dialog.setWindowTitle("Manual Definition Entry")
+            layout = QVBoxLayout()
+            
+            # Dynamic definition label
+            layout.addWidget(QLabel(f"Definition in {target_lang}:"))
+            definition_edit = QTextEdit()
+            layout.addWidget(definition_edit)
+
+            # Dynamic translation label
+            layout.addWidget(QLabel(f"Translation in {native_lang} (optional):"))
+            translation_edit = QTextEdit()
+            layout.addWidget(translation_edit)
+            
+            # Add buttons
+            button_layout = QHBoxLayout()
+            save_btn = QPushButton("Save")
+            cancel_btn = QPushButton("Cancel")
+            button_layout.addWidget(save_btn)
+            button_layout.addWidget(cancel_btn)
+            layout.addLayout(button_layout)
+            
+            dialog.setLayout(layout)
+            
+            # Handle button clicks
+            def on_save():
+                dialog.accept()
+            
+            def on_cancel():
+                dialog.reject()
+            
+            save_btn.clicked.connect(on_save)
+            cancel_btn.clicked.connect(on_cancel)
+            
+            if dialog.exec() == QDialog.DialogCode.Accepted and definition_edit.toPlainText().strip():
+                # Create a word_data structure with manual input
+                return {
+                    "word": word,
+                    "structure": [],
+                    "entries": [{
+                        "definition": definition_edit.toPlainText().strip(),
+                        "translation": translation_edit.toPlainText().strip(),
+                        "examples": []
+                    }],
+                    "pronunciation": None
+                }
+            
+        return "cancel"
