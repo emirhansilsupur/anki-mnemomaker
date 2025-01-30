@@ -70,3 +70,15 @@ class MnemonicGenerator:
             "target_language": target_language
         })
         return self._parse_response(response.content.strip())
+    
+    def _parse_response(self, response: str) -> dict:
+        result = {"mnemonic": "", "synonym": "", "antonym": ""}
+        for line in response.split("\n"):
+            line = line.strip()
+            if line.startswith("- Mnemonic:"):
+                result["mnemonic"] = line.split(":", 1)[1].strip()
+            elif line.startswith("- Synonym:"):
+                result["synonym"] = line.split(":", 1)[1].strip()
+            elif line.startswith("- Antonym:"):
+                result["antonym"] = line.split(":", 1)[1].strip()
+        return result
