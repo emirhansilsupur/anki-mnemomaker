@@ -150,3 +150,121 @@ class MnemonicGenerator:
             return result if result["entries"] else None
         except requests.RequestException as e:
             raise Exception(f"Cannot access Cambridge Dictionary: {str(e)}")
+
+    def create_anki_note(
+        word_data: Dict,
+        deck_name: str,
+        mnemonic: str,
+        synonym: str,
+        antonym: str,
+        night_mode: bool,
+    ) -> Dict:
+        """Creates a theme-aware Anki note with dynamic styling"""
+
+        # Theme configuration
+        if night_mode:
+            card_bg = "#2c2c2c"
+            heading_color = "#D8DEE9"
+            idx_color = "#8F9CB5"
+            pronunciation_color = "#808080"
+            structure_color = "#81A1C1"
+            mnemonic_bg = "#363636"
+            mnemonic_border = "#81A1C1"
+            definition_bg = "#3B4252"
+            definition_border = "#8F9CB5"
+            text_primary = "#D8DEE9"
+            text_secondary = "#808080"
+            example_border = "#4C566A"
+            translation_color = "#2d82c6"
+            box_border = "#363636"
+            synonym_bg = "#363636"
+            synonym_border = "#81A1C1"
+            antonym_bg = "#363636"
+            antonym_border = "#BF616A"
+        else:
+            card_bg = "#FFFFFF"
+            heading_color = "#2C3E50"
+            idx_color = "#2C3E50"
+            pronunciation_color = "#7F8C8D"
+            structure_color = "#95A5A6"
+            mnemonic_bg = "#F0F9FF"
+            mnemonic_border = "#3498DB"
+            definition_bg = "#F8F9FA"
+            definition_border = "#E5E7EB"
+            text_primary = "#2C3E50"
+            text_secondary = "#7F8C8D"
+            example_border = "#E5E7EB"
+            translation_color = "#3498DB"
+            box_border = "#E5E7EB"
+            synonym_bg = "#E6F4EA"
+            synonym_border = "#4CAF50"
+            antonym_bg = "#FFEBEE"
+            antonym_border = "#BF616A"
+
+        front = f"""<div style="text-align: center; padding: 20px; background-color: {card_bg};">
+            <h1 style="font-size: 2.5em; color: {heading_color}; margin-bottom: 10px;">{word_data['word']}</h1>
+            <div style="color: {pronunciation_color}; font-family: monospace; margin-bottom: 10px;">/{word_data.get('pronunciation', '')}/</div>
+            <div style="color: {structure_color}; font-style: italic;">{', '.join(word_data.get('structure', []))}</div>
+        </div>"""
+
+        back = f"""<div style="max-width: 600px; margin: 0 auto; padding: 20px; background-color: {card_bg};">
+            <!-- Mnemonic Section -->
+            <div style="background-color: {mnemonic_bg}; border-left: 4px solid {mnemonic_border}; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+                <div style="color: {mnemonic_border}; font-weight: bold; margin-bottom: 5px;">💡 Memory Hook</div>
+                <div style="font-style: italic; color: {text_primary};">{mnemonic}</div>
+            </div>
+
+            <!-- Synonym & Antonym Section -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                <div style="background-color: {synonym_bg}; border: 1px solid {synonym_border}; padding: 10px; border-radius: 4px;">
+                    <div style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <div style="color: {synonym_border}; font-weight: bold; margin-bottom: 5px;">🔗 Synonym</div>
+                        <div style="color: {text_primary};">{synonym}</div>
+                    </div>
+                </div>
+                <div style="background-color: {antonym_bg}; border: 1px solid {antonym_border}; padding: 10px; border-radius: 4px;">
+                    <div style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                        <div style="color: {antonym_border}; font-weight: bold; margin-bottom: 5px;">🧭 Antonym</div>
+                        <div style="color: {text_primary};">{antonym}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Definitions Section -->
+            <div style="display: grid; gap: 20px;">"""
+
+        for idx, entry in enumerate(word_data.get("entries", []), 1):
+            back += f"""
+                <div style="border: 1px solid {box_border}; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; gap: 10px; align-items: baseline; margin-bottom: 10px;">
+                        <span style="background-color: {idx_color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8em;">#{idx}</span>
+                        <div style="font-weight: 500; color: {heading_color};">{entry['definition']}</div>
+                    </div>
+                    
+                    <div style="color: {translation_color}; margin-bottom: 10px; padding-left: 25px;">
+                        {entry['translation']}
+                    </div>"""
+
+            if entry.get("examples"):
+                back += (
+                    """<div style="margin-top: 10px; padding-left: 25px;">
+                    <div style="color: %s; font-size: 0.9em; margin-bottom: 5px;">Examples:</div>
+                    <ul style="list-style-type: none; padding: 0; margin: 0;">"""
+                    % text_secondary
+                )
+                for example in entry["examples"]:
+                    back += f"""<li style="margin-bottom: 5px; color: {text_primary}; padding-left: 15px; border-left: 2px solid {example_border};">
+                        {example}
+                    </li>"""
+                back += "</ul></div>"
+
+            back += "</div>"
+
+        back += """</div></div>"""
+
+        return {
+            "deckName": deck_name,
+            "modelName": "Basic",
+            "fields": {"Front": front, "Back": back},
+            "options": {"allowDuplicate": True},
+            "tags": ["cambridge_dictionary"],
+        }
