@@ -204,3 +204,32 @@ class CambridgeDictionaryDialog(QDialog):
                 QPushButton:hover { background-color: #D0D0D0; }
             """
             )
+
+    def initialize_llm(self):
+        provider = config.get("llm_provider", "Groq").capitalize()
+        model = config.get(f"{provider.lower()}_model", "")
+
+        if provider in self.llm_providers:
+            self.provider_combo.setCurrentText(provider)
+            self.model_combo.setCurrentText(model)
+
+        self.validate_api_keys()
+
+    def validate_api_keys(self):
+        provider = self.provider_combo.currentText().lower()
+        api_key = config.get(f"{provider}_api_key", "")
+
+        if not api_key or api_key.startswith("your-"):
+            showInfo(
+                f"Please set your {self.provider_combo.currentText()} API key in add-on config!"
+            )
+            return False
+
+        try:
+            self.mnemonic_generator = MnemonicGenerator(
+                provider=provider, api_key=api_key, model=self.model_combo.currentText()
+            )
+            return True
+        except Exception as e:
+            showInfo(f"Error initializing {provider}:\n{str(e)}")
+            return False
