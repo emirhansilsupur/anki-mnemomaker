@@ -53,3 +53,20 @@ class MnemonicGenerator:
         )
 
         self.chain = self.prompt | self.llm
+
+
+    def create_mnemonic(
+        self, 
+        word: str, 
+        definition: str, 
+        native_language: str = "English",
+        target_language: str = "English"
+    ) -> dict:
+        """Generate a mnemonic, synonym, and antonym for the given word"""
+        response = self.chain.invoke({
+            "word": word,
+            "definition": definition,
+            "native_language": native_language,
+            "target_language": target_language
+        })
+        return self._parse_response(response.content.strip())
