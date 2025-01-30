@@ -165,3 +165,42 @@ class CambridgeDictionaryDialog(QDialog):
 
         self.update_target_languages()
         self.update_models()
+
+    def update_word_label(self):
+        # Update the word label based on the selected target language
+        target_language = self.target_combo.currentText()
+        self.word_label.setText(f"Word in {target_language}:")  
+
+    def apply_theme_styles(self):
+        if mw.pm.night_mode():
+            self.setStyleSheet(
+                """
+                QDialog { background-color: #2E3440; color: #D8DEE9; }
+                QLabel { color: #D8DEE9; }
+                QLineEdit, QComboBox { 
+                    background-color: #3B4252; color: #D8DEE9; 
+                    border: 1px solid #4C566A; padding: 5px;
+                }
+                QPushButton { 
+                    background-color: #434C5E; color: #D8DEE9;
+                    border: 1px solid #4C566A; padding: 5px;
+                }
+                QPushButton:hover { background-color: #4C566A; }
+            """
+            )
+        else:
+            self.setStyleSheet(
+                """
+                QDialog { background-color: #FFFFFF; color: #000000; }
+                QLabel { color: #000000; }
+                QLineEdit, QComboBox { 
+                    background-color: #F0F0F0; color: #000000; 
+                    border: 1px solid #CCCCCC; padding: 5px;
+                }
+                QPushButton { 
+                    background-color: #E0E0E0; color: #000000;
+                    border: 1px solid #CCCCCC; padding: 5px;
+                }
+                QPushButton:hover { background-color: #D0D0D0; }
+            """
+            )
