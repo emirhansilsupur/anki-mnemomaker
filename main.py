@@ -233,3 +233,30 @@ class CambridgeDictionaryDialog(QDialog):
         except Exception as e:
             showInfo(f"Error initializing {provider}:\n{str(e)}")
             return False
+        
+    def update_models(self):
+        provider = self.provider_combo.currentText()
+        self.model_combo.clear()
+        self.model_combo.addItems(self.llm_models.get(provider, []))
+        self.validate_api_keys()
+
+    def update_target_languages(self):
+        source_lang = next(
+            k
+            for k, v in self.language_names.items()
+            if v == self.source_combo.currentText()
+        )
+        targets = self.language_config[source_lang]["can_learn"]
+        self.target_combo.clear()
+        self.target_combo.addItems([self.language_names[lang] for lang in targets])
+        self.update_word_label()
+
+    def update_deck_list(self):
+        self.deck_combo.clear()
+        decks = sorted(mw.col.decks.all_names_and_ids(), key=lambda x: x.name)
+        for deck in decks:
+            self.deck_combo.addItem(deck.name, deck.id)
+        if config.get("deck_name"):
+            index = self.deck_combo.findText(config["deck_name"])
+            if index >= 0:
+                self.deck_combo.setCurrentIndex(index)
