@@ -260,3 +260,14 @@ class CambridgeDictionaryDialog(QDialog):
             index = self.deck_combo.findText(config["deck_name"])
             if index >= 0:
                 self.deck_combo.setCurrentIndex(index)
+
+    def get_dict_url(self, word):
+        source_lang = next(k for k, v in self.language_names.items() if v == self.source_combo.currentText())
+        target_lang = next(k for k, v in self.language_names.items() if v == self.target_combo.currentText())
+        
+        # Handle Turkish edge case (english-turkish is fixed)
+        if source_lang == "turkish":
+            return f"english-turkish/{word.lower().replace(' ', '-')}"
+            
+        dict_format = self.language_config[source_lang]["dict_format"]
+        return f"{dict_format.format(target=target_lang)}/{word.lower().replace(' ', '-')}"
