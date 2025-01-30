@@ -1,0 +1,6 @@
+langchain-core
+langchain-groq
+bs4
+requests
+langchain-openai
+langchain-community
