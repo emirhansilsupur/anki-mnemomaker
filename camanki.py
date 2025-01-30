@@ -82,3 +82,71 @@ class MnemonicGenerator:
             elif line.startswith("- Antonym:"):
                 result["antonym"] = line.split(":", 1)[1].strip()
         return result
+    
+    def get_word_data(word: str, dict_url: str) -> Dict:
+        """Get word data from Cambridge Dictionary"""
+        try:
+            url = f"https://dictionary.cambridge.org/dictionary/{dict_url}"
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+                "Referer": "https://dictionary.cambridge.org/",
+                "Accept-Language": "en-US,en;q=0.9",
+            }
+            time.sleep(random.uniform(2, 5))
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.content, "html.parser")
+
+            # New existence check
+            entry_body = soup.find(class_="entry-body")
+            dictionary_entry = soup.find(class_="dictionary-entry")
+            
+            # If neither main content structure exists, return None
+            if not entry_body and not dictionary_entry:
+                return None
+            
+            result = {"word": word, "structure": [], "entries": [], "pronunciation": None}
+
+            structures = soup.find(class_="dpos")
+            if structures:
+                result["structure"].append(structures.text.strip())
+
+            ipa_pronunciation = soup.find(class_="ipa dipa")
+            if ipa_pronunciation:
+                result["pronunciation"] = ipa_pronunciation.text.strip()
+
+            for def_block in soup.find_all(class_="def-block"):
+                entry = {"definition": None, "translation": None, "examples": []}
+
+                definition = def_block.find(class_="def")
+                translation = def_block.find(class_="trans")
+                examples = def_block.find_all(class_="eg")
+
+                if definition:
+                    entry["definition"] = definition.text.strip()
+                if translation:
+                    entry["translation"] = translation.text.strip()
+            
+                if examples:
+                    entry["examples"].extend([ex.text.strip() for ex in examples])
+
+                if entry["definition"] or entry["translation"]:  # Only add if there's content
+                    result["entries"].append(entry)    
+
+                
+
+            other_examples = []
+            if soup.find_all(class_="degs"):
+                for examp in soup.find_all(class_="degs"):
+                    deg_examples = examp.find_all(class_="deg")
+                    if deg_examples:
+                        other_examples.extend([ex.text.strip() for ex in deg_examples])
+            
+
+            if other_examples:
+                result["other_examples"] = other_examples[:1]
+            
+            return result if result["entries"] else None
+        except requests.RequestException as e:
+            raise Exception(f"Cannot access Cambridge Dictionary: {str(e)}")
