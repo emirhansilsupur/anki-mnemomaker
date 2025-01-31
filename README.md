@@ -1,4 +1,4 @@
-# MnemoMaker - AI-Powered Flashcard Creator
+# MnemoMaker: Language Learning Accelerator
 
 ## Description
 MnemoMaker is an advanced Anki add-on that transforms vocabulary learning by automatically creating comprehensive flashcards. It integrates with Cambridge Dictionary and AI services to generate beautifully formatted cards featuring definitions, examples, translations, and AI-powered mnemonics.
