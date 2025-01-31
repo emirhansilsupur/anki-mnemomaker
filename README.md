@@ -40,7 +40,7 @@ Supports multiple language pairs including:
 ## Installation Guide
 
 1. **Add-on Installation**
-   1. In Anki, go to Tools → Add-ons → Get Add-ons and enter the installation code [from here.](https://ankiweb.net/shared/info/756388520?cb=1738266247932).
+   1. In Anki, go to Tools → Add-ons → Get Add-ons and enter the installation code [from here](https://ankiweb.net/shared/info/756388520?cb=1738266247932).
    2. Restart Anki.
 
 
