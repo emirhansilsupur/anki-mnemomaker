@@ -7,9 +7,9 @@ MnemoMaker is an advanced Anki add-on that transforms vocabulary learning by aut
 A mnemonic device is a learning technique that aids information retention by creating meaningful associations. These memory devices help connect new information with existing knowledge in your long-term memory, making learning more efficient and memorable.
 
 
-<img src="https://raw.githubusercontent.com/emirhansilsupur/anki-mnemomaker/main/assets/mnemonic_ui.PNG" alt="mm" style="width: 50%; margin-right: 10px;">
+<img src="https://raw.githubusercontent.com/emirhansilsupur/anki-mnemomaker/main/assets/mnemonic_ui_1.PNG" alt="mm" style="width: 50%; margin-right: 10px;">
 <div style="display: flex;">
-  <img src="https://raw.githubusercontent.com/emirhansilsupur/anki-mnemomaker/main/assets/mnemonic_pr.PNG" alt="mm2" style="width: 50%;">
+  <img src="https://raw.githubusercontent.com/emirhansilsupur/anki-mnemomaker/main/assets/mnemonic_pr_1.PNG" alt="mm2" style="width: 50%;">
 </div>
 
 ## Features
