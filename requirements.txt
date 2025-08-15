@@ -4,3 +4,4 @@ bs4
 requests
 langchain-openai
 langchain-community
+pydantic_core
